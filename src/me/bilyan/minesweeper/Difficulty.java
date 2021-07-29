@@ -15,6 +15,11 @@ public enum Difficulty {
         this.minesCount = minesCount;
     }
 
+    public String getDescription() {
+        return "(" + getRowsCount() + " * " + getColsCount() + " Cells and " +
+                getMinesCount() + " Mines)";
+    }
+
     public int getRowsCount() {
         return rowsCount;
     }

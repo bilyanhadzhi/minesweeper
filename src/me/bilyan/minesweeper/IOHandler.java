@@ -58,9 +58,14 @@ public class IOHandler {
 
     private void printDifficultyPrompt() {
         System.out.println("Enter the difficulty level");
-        System.out.println("Press 0 for " + Difficulty.BEGINNER);
-        System.out.println("Press 1 for " + Difficulty.INTERMEDIATE);
-        System.out.println("Press 2 for " + Difficulty.ADVANCED);
+        System.out.println("Press 0 for " + Difficulty.BEGINNER + " " +
+                Difficulty.BEGINNER.getDescription());
+
+        System.out.println("Press 1 for " + Difficulty.INTERMEDIATE + " " +
+                Difficulty.INTERMEDIATE.getDescription());
+
+        System.out.println("Press 2 for " + Difficulty.ADVANCED + " " +
+                Difficulty.ADVANCED.getDescription());
 
         printPrompt();
     }

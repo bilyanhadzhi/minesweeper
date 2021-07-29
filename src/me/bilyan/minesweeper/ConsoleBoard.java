@@ -1,7 +1,9 @@
 package me.bilyan.minesweeper;
 
 import me.bilyan.minesweeper.exceptions.InvalidBoardPositionException;
+import me.bilyan.minesweeper.exceptions.UninitializedBoardException;
 
+import java.io.PrintStream;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
@@ -24,36 +26,46 @@ public class ConsoleBoard implements Board {
     // used when revealing all mine tiles once game is lost
     private final Set<IntPair> mineTileCoordinates;
 
-    public ConsoleBoard(Difficulty difficulty) {
+    // used when initializing mine positions,
+    // added as dependency for testability
+    private final Random random;
+
+    public ConsoleBoard(Difficulty difficulty, Random random) {
         this.rowsCount = difficulty.getRowsCount();
         this.colsCount = difficulty.getColsCount();
         this.minesCount = difficulty.getMinesCount();
 
         this.revealedSafeTilesCount = 0;
         this.mineTileCoordinates = new HashSet<>();
+        this.random = random;
     }
 
     @Override
-    public void render() {
-        // print column numbers
-        System.out.print("    ");
-        for (int col = 0; col < colsCount; col++) {
-            System.out.printf("%2d ", col);
+    public void render(PrintStream printStream) throws UninitializedBoardException {
+        if (state == null) {
+            throw new UninitializedBoardException("Trying to initialize board that does not exist");
         }
-        System.out.println();
+
+        // print column numbers
+        printStream.append("    ");
+
+        for (int col = 0; col < colsCount; col++) {
+            printStream.append(String.format("%2d ", col));
+        }
+        printStream.append(System.lineSeparator());
 
         // print board itself
         for (int row = 0; row < rowsCount; row++) {
 
             // print row number
-            System.out.printf("%-4d", row);
+            printStream.append(String.format("%-4d", row));
 
             for (int col = 0; col < colsCount; col++) {
                 char toPrint = getCharacterForTile(new IntPair(row, col));
 
-                System.out.printf("%2c ", toPrint);
+                printStream.append(String.format("%2c ", toPrint));
             }
-            System.out.println();
+            printStream.append(System.lineSeparator());
         }
     }
 
@@ -86,7 +98,6 @@ public class ConsoleBoard implements Board {
         revealedSafeTilesCount++;
 
         int neighboringMines = getNeighboringMinesCount(coordinates);
-
         if (neighboringMines == 0) {
             for (int i = 0; i < ROW_DIFFERENCE.length; i++) {
                 IntPair neighborCoordinates =
@@ -129,7 +140,7 @@ public class ConsoleBoard implements Board {
         } else if (!tile.isMine()) {
             int neighboringMinesCount = getNeighboringMinesCount(tileCoordinates);
 
-            if (neighboringMinesCount ==  0) {
+            if (neighboringMinesCount == 0) {
                 toPrint = Tile.TILE_SYMBOL_EMPTY;
             } else {
                 toPrint = (char)(neighboringMinesCount + (int)'0');
@@ -149,8 +160,6 @@ public class ConsoleBoard implements Board {
 
     private void generateInitialState(IntPair excluding) {
         int minesLeftToGenerate = minesCount;
-
-        Random random = new Random();
 
         state = new Tile[rowsCount][colsCount];
         for (int row = 0; row < rowsCount; row++) {
