@@ -2,16 +2,16 @@ package me.bilyan.minesweeper;
 
 import java.util.Objects;
 
-public class Pair {
+public class IntPair {
     private int firstElement;
     private int secondElement;
 
-    public Pair() {
+    public IntPair() {
         this.firstElement = 0;
         this.secondElement = 0;
     }
 
-    public Pair(int firstElement, int secondElement) {
+    public IntPair(int firstElement, int secondElement) {
         this.firstElement = firstElement;
         this.secondElement = secondElement;
     }
@@ -42,9 +42,9 @@ public class Pair {
             return false;
         }
 
-        Pair pair = (Pair) other;
+        IntPair intPair = (IntPair) other;
 
-        return firstElement == pair.firstElement && secondElement == pair.secondElement;
+        return firstElement == intPair.firstElement && secondElement == intPair.secondElement;
     }
 
     @Override

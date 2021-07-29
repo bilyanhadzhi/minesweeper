@@ -1,6 +1,10 @@
 package me.bilyan.minesweeper;
 
 public class Tile {
+    public static char TILE_SYMBOL_UNREVEALED = '–';
+    public static char TILE_SYMBOL_EMPTY = '.';
+    public static char TILE_SYMBOL_MINE = '*';
+
     private boolean isMine;
     private boolean isRevealed;
 

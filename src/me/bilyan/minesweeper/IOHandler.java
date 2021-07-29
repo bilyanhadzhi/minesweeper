@@ -24,7 +24,7 @@ public class IOHandler {
         }
     }
 
-    public Pair getCoordinatesFromInput() {
+    public IntPair getCoordinatesFromInput() {
         printMovePrompt();
 
         int row, column;
@@ -32,7 +32,7 @@ public class IOHandler {
         row = scanner.nextInt();
         column = scanner.nextInt();
 
-        return new Pair(row, column);
+        return new IntPair(row, column);
     }
 
     public void printInvalidInputMessage() {
@@ -64,5 +64,4 @@ public class IOHandler {
 
         printPrompt();
     }
-
 }

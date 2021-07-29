@@ -7,7 +7,7 @@ import me.bilyan.minesweeper.exceptions.InvalidBoardPositionException;
 public interface Board {
     void render();
 
-    void revealTile(Pair coordinates) throws InvalidBoardPositionException;
+    void revealTile(IntPair coordinates) throws InvalidBoardPositionException;
 
     int getRevealedSafeTilesCount();
 

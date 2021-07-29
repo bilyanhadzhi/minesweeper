@@ -2,20 +2,27 @@ package me.bilyan.minesweeper;
 
 import me.bilyan.minesweeper.exceptions.InvalidBoardPositionException;
 
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 
 public class ConsoleBoard implements Board {
+    // used when iterating over the neighbors of a tile
+    private static final int[] ROW_DIFFERENCE = {1, 1, 1, 0, -1, -1, -1, 0};
+    private static final int[] COL_DIFFERENCE = {-1, 0, 1, 1, 1, 0, -1, -1};
+
     private final int rowsCount;
     private final int colsCount;
     private final int minesCount;
 
+    private Tile[][] state;
+
+    // used when determining if game is over
     private int revealedSafeTilesCount;
     private boolean hasRevealedMine;
 
-    private static final int[] ROW_DIFFERENCE = {1, 1, 1, 0, -1, -1, -1, 0};
-    private static final int[] COL_DIFFERENCE = {-1, 0, 1, 1, 1, 0, -1, -1};
-
-    private Tile[][] state;
+    // used when revealing all mine tiles once game is lost
+    private final Set<IntPair> mineTileCoordinates;
 
     public ConsoleBoard(Difficulty difficulty) {
         this.rowsCount = difficulty.getRowsCount();
@@ -23,36 +30,26 @@ public class ConsoleBoard implements Board {
         this.minesCount = difficulty.getMinesCount();
 
         this.revealedSafeTilesCount = 0;
+        this.mineTileCoordinates = new HashSet<>();
     }
 
     @Override
     public void render() {
+        // print column numbers
         System.out.print("    ");
         for (int col = 0; col < colsCount; col++) {
             System.out.printf("%2d ", col);
         }
         System.out.println();
 
+        // print board itself
         for (int row = 0; row < rowsCount; row++) {
+
+            // print row number
             System.out.printf("%-4d", row);
 
             for (int col = 0; col < colsCount; col++) {
-                char toPrint;
-                Tile tile = state[row][col];
-
-                if (!tile.isRevealed()) {
-                    toPrint = '–';
-                } else if (!tile.isMine()) {
-                    int neighboringMinesCount = getNeighboringMinesCount(new Pair(row, col));
-
-                    if (neighboringMinesCount ==  0) {
-                        toPrint = '.';
-                    } else {
-                        toPrint = (char)(neighboringMinesCount + (int)'0');
-                    }
-                } else {
-                    toPrint = '*';
-                }
+                char toPrint = getCharacterForTile(new IntPair(row, col));
 
                 System.out.printf("%2c ", toPrint);
             }
@@ -61,11 +58,12 @@ public class ConsoleBoard implements Board {
     }
 
     @Override
-    public void revealTile(Pair coordinates) throws InvalidBoardPositionException {
+    public void revealTile(IntPair coordinates) throws InvalidBoardPositionException {
         if (!isValidBoardPosition(coordinates)) {
             throw new InvalidBoardPositionException("Trying to reveal tile at invalid position");
         }
 
+        // the state is not generated until the first tile revealed
         if (state == null) {
             generateInitialState(coordinates);
         }
@@ -91,16 +89,15 @@ public class ConsoleBoard implements Board {
 
         if (neighboringMines == 0) {
             for (int i = 0; i < ROW_DIFFERENCE.length; i++) {
-                Pair neighborCoordinates =
-                        new Pair(coordinates.first() + ROW_DIFFERENCE[i],
-                                coordinates.second() + COL_DIFFERENCE[i]);
+                IntPair neighborCoordinates =
+                        new IntPair(coordinates.first() + ROW_DIFFERENCE[i],
+                                    coordinates.second() + COL_DIFFERENCE[i]);
 
                 if (!isValidBoardPosition(neighborCoordinates)) {
                     continue;
                 }
 
                 Tile neighbor = state[neighborCoordinates.first()][neighborCoordinates.second()];
-
                 if (!neighbor.isRevealed()) {
                     revealTile(neighborCoordinates);
                 }
@@ -123,17 +120,34 @@ public class ConsoleBoard implements Board {
         return rowsCount * colsCount;
     }
 
-    private void revealAllMineTiles() {
-        for (int row = 0; row < rowsCount; row++) {
-            for (int col = 0; col < colsCount; col++) {
-                if (state[row][col].isMine()) {
-                    state[row][col].setRevealed(true);
-                }
+    private char getCharacterForTile(IntPair tileCoordinates) {
+        Tile tile = state[tileCoordinates.first()][tileCoordinates.second()];
+
+        char toPrint;
+        if (!tile.isRevealed()) {
+            toPrint = Tile.TILE_SYMBOL_UNREVEALED;
+        } else if (!tile.isMine()) {
+            int neighboringMinesCount = getNeighboringMinesCount(tileCoordinates);
+
+            if (neighboringMinesCount ==  0) {
+                toPrint = Tile.TILE_SYMBOL_EMPTY;
+            } else {
+                toPrint = (char)(neighboringMinesCount + (int)'0');
             }
+        } else {
+            toPrint = Tile.TILE_SYMBOL_MINE;
+        }
+
+        return toPrint;
+    }
+
+    private void revealAllMineTiles() {
+        for (IntPair mineTile : mineTileCoordinates) {
+            state[mineTile.first()][mineTile.second()].setRevealed(true);
         }
     }
 
-    private void generateInitialState(Pair excluding) {
+    private void generateInitialState(IntPair excluding) {
         int minesLeftToGenerate = minesCount;
 
         Random random = new Random();
@@ -146,7 +160,7 @@ public class ConsoleBoard implements Board {
         }
 
         while (minesLeftToGenerate > 0) {
-            Pair toAdd = new Pair(random.nextInt(rowsCount), random.nextInt(colsCount));
+            IntPair toAdd = new IntPair(random.nextInt(rowsCount), random.nextInt(colsCount));
 
             if (state[toAdd.first()][toAdd.second()].isMine() || toAdd.equals(excluding)) {
                 continue;
@@ -154,16 +168,17 @@ public class ConsoleBoard implements Board {
 
             minesLeftToGenerate--;
             state[toAdd.first()][toAdd.second()].setMine(true);
+            mineTileCoordinates.add(new IntPair(toAdd.first(), toAdd.second()));
         }
     }
 
-    private int getNeighboringMinesCount(Pair coordinates) {
+    private int getNeighboringMinesCount(IntPair coordinates) {
 
         int minesFound = 0;
 
         for (int i = 0; i < ROW_DIFFERENCE.length; i++) {
-            Pair neighborPosition =
-                    new Pair(coordinates.first() + ROW_DIFFERENCE[i],
+            IntPair neighborPosition =
+                    new IntPair(coordinates.first() + ROW_DIFFERENCE[i],
                              coordinates.second() + COL_DIFFERENCE[i]);
 
             if (isValidBoardPosition(neighborPosition)) {
@@ -178,7 +193,7 @@ public class ConsoleBoard implements Board {
         return minesFound;
     }
 
-    private boolean isValidBoardPosition(Pair position) {
+    private boolean isValidBoardPosition(IntPair position) {
         return position.first() >= 0 && position.first() < rowsCount
                 && position.second() >= 0 && position.second() < colsCount;
     }

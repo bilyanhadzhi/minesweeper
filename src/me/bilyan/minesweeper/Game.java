@@ -3,9 +3,13 @@ package me.bilyan.minesweeper;
 import me.bilyan.minesweeper.exceptions.InvalidBoardPositionException;
 
 public class Game {
-    private final IOHandler ioHandler = new IOHandler();
+    private final IOHandler ioHandler;
     private Board board;
     private Difficulty difficulty;
+
+    public Game() {
+        this.ioHandler = new IOHandler();
+    }
 
     public void run() {
         Difficulty difficulty = ioHandler.getDifficultyFromInput();
@@ -14,13 +18,14 @@ public class Game {
         this.board = new ConsoleBoard(difficulty);
 
         while (true) {
-            Pair coordinatesInput = ioHandler.getCoordinatesFromInput();
+            IntPair coordinatesInput = ioHandler.getCoordinatesFromInput();
 
             try {
                 executeTurn(coordinatesInput);
                 board.render();
             } catch (InvalidBoardPositionException e) {
                 ioHandler.printInvalidInputMessage();
+                continue;
             }
 
             if (isLost()) {
@@ -35,7 +40,7 @@ public class Game {
         }
     }
 
-    private void executeTurn(Pair coordinates) throws InvalidBoardPositionException {
+    private void executeTurn(IntPair coordinates) throws InvalidBoardPositionException {
         board.revealTile(coordinates);
     }
 
