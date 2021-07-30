@@ -3,6 +3,7 @@ package me.bilyan.minesweeper;
 import me.bilyan.minesweeper.exceptions.InvalidBoardPositionException;
 import me.bilyan.minesweeper.exceptions.UninitializedBoardException;
 
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Random;
 
@@ -10,11 +11,11 @@ public class Game {
     private final IOHandler ioHandler;
     private Board board;
     private Difficulty difficulty;
-    private final PrintStream printStream;
+    private final PrintStream output;
 
-    public Game() {
-        this.ioHandler = new IOHandler();
-        this.printStream = System.out;
+    public Game(InputStream input, PrintStream output) {
+        this.ioHandler = new IOHandler(input, output);
+        this.output = output;
     }
 
     public void run() {
@@ -28,7 +29,7 @@ public class Game {
 
             try {
                 executeTurn(coordinatesInput);
-                board.render(printStream);
+                board.render(output);
             } catch (InvalidBoardPositionException e) {
                 ioHandler.printInvalidInputMessage();
                 continue;

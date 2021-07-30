@@ -36,6 +36,18 @@ public class ConsoleBoardTest {
             "7    1  –  –  –  –  –  –  *  – \n" +
             "8    *  –  –  –  –  –  –  –  * \n";
 
+    private static final String OUTPUT_REVEALED_TILES =
+            "     0  1  2  3  4  5  6  7  8 \n" +
+            "0    –  –  1  .  .  .  .  .  . \n" +
+            "1    –  –  2  1  .  .  .  .  . \n" +
+            "2    –  –  –  2  1  .  .  .  . \n" +
+            "3    –  –  –  –  2  1  .  .  . \n" +
+            "4    –  –  –  –  –  2  1  .  . \n" +
+            "5    –  –  –  –  –  –  2  1  . \n" +
+            "6    –  –  –  –  –  –  –  2  1 \n" +
+            "7    –  –  –  –  –  –  –  –  – \n" +
+            "8    –  –  –  –  –  –  –  –  – \n";
+
     @Mock
     private Random mockRandom;
 
@@ -74,11 +86,14 @@ public class ConsoleBoardTest {
     }
 
     @Test
-    public void testRevealTileRevealsNeighboringEmptyTiles() throws InvalidBoardPositionException {
+    public void testRevealTileRevealsNeighboringEmptyTiles() throws InvalidBoardPositionException, UninitializedBoardException {
         setUpMockRandom();
         defaultBoard.revealTile(new IntPair(0, 8));
 
         assertEquals(34, defaultBoard.getRevealedSafeTilesCount());
+
+        defaultBoard.render(DEFAULT_RENDER_STREAM);
+        assertEquals(OUTPUT_REVEALED_TILES, DEFAULT_BYTE_STREAM.toString());
     }
 
     @Test

@@ -1,10 +1,18 @@
 package me.bilyan.minesweeper;
 
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.List;
 import java.util.Scanner;
 
 public class IOHandler {
-    private final Scanner scanner = new Scanner(System.in);
+    private final Scanner input;
+    private final PrintStream output;
+
+    public IOHandler(InputStream input, PrintStream output) {
+        this.input = new Scanner(input);
+        this.output = output;
+    }
 
     public Difficulty getDifficultyFromInput() {
         List<Integer> validInputs = List.of(0, 1, 2);
@@ -12,7 +20,7 @@ public class IOHandler {
         int userInput;
         do {
             printDifficultyPrompt();
-            userInput = scanner.nextInt();
+            userInput = input.nextInt();
         } while (!validInputs.contains(userInput));
 
         if (userInput == 0) {
@@ -29,42 +37,42 @@ public class IOHandler {
 
         int row, column;
 
-        row = scanner.nextInt();
-        column = scanner.nextInt();
+        row = input.nextInt();
+        column = input.nextInt();
 
         return new IntPair(row, column);
     }
 
     public void printInvalidInputMessage() {
-        System.out.println("Invalid tile position");
+        output.println("Invalid tile position");
     }
 
     public void printEndgameMessage(boolean hasWon) {
         if (hasWon) {
-            System.out.println("You won!");
+            output.println("You won!");
         } else {
-            System.out.println("You lost!");
+            output.println("You lost!");
         }
     }
 
     private void printPrompt() {
-        System.out.print("-> ");
+        output.print("-> ");
     }
 
     private void printMovePrompt() {
-        System.out.println("Enter your move (row, column)");
+        output.println("Enter your move (row, column)");
         printPrompt();
     }
 
     private void printDifficultyPrompt() {
-        System.out.println("Enter the difficulty level");
-        System.out.println("Press 0 for " + Difficulty.BEGINNER + " " +
+        output.println("Enter the difficulty level");
+        output.println("Press 0 for " + Difficulty.BEGINNER + " " +
                 Difficulty.BEGINNER.getDescription());
 
-        System.out.println("Press 1 for " + Difficulty.INTERMEDIATE + " " +
+        output.println("Press 1 for " + Difficulty.INTERMEDIATE + " " +
                 Difficulty.INTERMEDIATE.getDescription());
 
-        System.out.println("Press 2 for " + Difficulty.ADVANCED + " " +
+        output.println("Press 2 for " + Difficulty.ADVANCED + " " +
                 Difficulty.ADVANCED.getDescription());
 
         printPrompt();
