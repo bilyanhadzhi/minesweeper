@@ -30,7 +30,10 @@ public class ConsoleBoard implements Board {
     // added as dependency for testability
     private final Random random;
 
-    public ConsoleBoard(Difficulty difficulty, Random random) {
+    // used when rendering the board
+    private final PrintStream output;
+
+    public ConsoleBoard(Difficulty difficulty, Random random, PrintStream output) {
         this.rowsCount = difficulty.getRowsCount();
         this.colsCount = difficulty.getColsCount();
         this.minesCount = difficulty.getMinesCount();
@@ -38,34 +41,35 @@ public class ConsoleBoard implements Board {
         this.revealedSafeTilesCount = 0;
         this.mineTileCoordinates = new HashSet<>();
         this.random = random;
+        this.output = output;
     }
 
     @Override
-    public void render(PrintStream printStream) throws UninitializedBoardException {
+    public void render() throws UninitializedBoardException {
         if (state == null) {
             throw new UninitializedBoardException("Trying to initialize board that does not exist");
         }
 
         // print column numbers
-        printStream.append("    ");
+        output.append("    ");
 
         for (int col = 0; col < colsCount; col++) {
-            printStream.append(String.format("%2d ", col));
+            output.append(String.format("%2d ", col));
         }
-        printStream.append(System.lineSeparator());
+        output.append(System.lineSeparator());
 
         // print board itself
         for (int row = 0; row < rowsCount; row++) {
 
             // print row number
-            printStream.append(String.format("%-4d", row));
+            output.append(String.format("%-4d", row));
 
             for (int col = 0; col < colsCount; col++) {
                 char toPrint = getCharacterForTile(new IntPair(row, col));
 
-                printStream.append(String.format("%2c ", toPrint));
+                output.append(String.format("%2c ", toPrint));
             }
-            printStream.append(System.lineSeparator());
+            output.append(System.lineSeparator());
         }
     }
 

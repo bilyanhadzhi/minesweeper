@@ -9,7 +9,6 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Random;
 
@@ -56,12 +55,12 @@ public class ConsoleBoardTest {
 
     @Before
     public void initializeBoard() {
-        this.defaultBoard = new ConsoleBoard(DEFAULT_DIFFICULTY, mockRandom);
+        this.defaultBoard = new ConsoleBoard(DEFAULT_DIFFICULTY, mockRandom, DEFAULT_RENDER_STREAM);
     }
 
     @Test(expected = UninitializedBoardException.class)
     public void testRenderThrowsForUninitializedMatrix() throws UninitializedBoardException {
-        defaultBoard.render(DEFAULT_RENDER_STREAM);
+        defaultBoard.render();
     }
 
     @Test(expected = InvalidBoardPositionException.class)
@@ -96,7 +95,7 @@ public class ConsoleBoardTest {
 
         assertEquals(34, defaultBoard.getRevealedSafeTilesCount());
 
-        defaultBoard.render(DEFAULT_RENDER_STREAM);
+        defaultBoard.render();
         assertEquals(OUTPUT_REVEALED_TILES, DEFAULT_BYTE_STREAM.toString());
     }
 
@@ -109,7 +108,7 @@ public class ConsoleBoardTest {
         defaultBoard.revealTile(new IntPair(7, 0));
         defaultBoard.revealTile(new IntPair(8, 0));
 
-        defaultBoard.render(DEFAULT_RENDER_STREAM);
+        defaultBoard.render();
         assertTrue(defaultBoard.hasRevealedMine());
         assertEquals(OUTPUT_MINES, DEFAULT_BYTE_STREAM.toString());
 
