@@ -6,6 +6,14 @@ import java.util.List;
 import java.util.Scanner;
 
 public class IOHandler {
+    private static final String PROMPT_DEFAULT = "-> ";
+    private static final String PROMPT_MOVE = "Enter your move (row, column)";
+    private static final String PROMPT_DIFFICULTY = "Enter the difficulty level";
+    private static final String PROMPT_DIFFICULTY_OPTION = "Press %d for %s %s";
+    private static final String MESSAGE_INVALID_TILE = "Invalid tile position";
+    private static final String MESSAGE_GAME_WON = "You won!";
+    private static final String MESSAGE_GAME_LOST = "You lost!";
+
     private final Scanner input;
     private final PrintStream output;
 
@@ -44,37 +52,36 @@ public class IOHandler {
     }
 
     public void printInvalidInputMessage() {
-        output.println("Invalid tile position");
+        output.println(MESSAGE_INVALID_TILE);
     }
 
     public void printEndgameMessage(boolean hasWon) {
         if (hasWon) {
-            output.println("You won!");
+            output.println(MESSAGE_GAME_WON);
         } else {
-            output.println("You lost!");
+            output.println(MESSAGE_GAME_LOST);
         }
     }
 
-    private void printPrompt() {
-        output.print("-> ");
+    private void printDefaultPrompt() {
+        output.print(PROMPT_DEFAULT);
     }
 
     private void printMovePrompt() {
-        output.println("Enter your move (row, column)");
-        printPrompt();
+        output.println(PROMPT_MOVE);
+        printDefaultPrompt();
     }
 
     private void printDifficultyPrompt() {
-        output.println("Enter the difficulty level");
-        output.println("Press 0 for " + Difficulty.BEGINNER + " " +
-                Difficulty.BEGINNER.getDescription());
+        output.println(PROMPT_DIFFICULTY);
+        List<Difficulty> difficulties =
+                List.of(Difficulty.BEGINNER, Difficulty.INTERMEDIATE, Difficulty.ADVANCED);
 
-        output.println("Press 1 for " + Difficulty.INTERMEDIATE + " " +
-                Difficulty.INTERMEDIATE.getDescription());
+        for (Difficulty difficulty : difficulties) {
+            output.printf((PROMPT_DIFFICULTY_OPTION) + "%n",
+                    difficulty.ordinal(), difficulty, difficulty.getDescription());
+        }
 
-        output.println("Press 2 for " + Difficulty.ADVANCED + " " +
-                Difficulty.ADVANCED.getDescription());
-
-        printPrompt();
+        printDefaultPrompt();
     }
 }
