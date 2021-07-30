@@ -1,7 +1,6 @@
 package me.bilyan.minesweeper;
 
 import me.bilyan.minesweeper.exceptions.InvalidBoardPositionException;
-import me.bilyan.minesweeper.exceptions.UninitializedBoardException;
 
 import java.io.PrintStream;
 import java.util.Random;
@@ -32,8 +31,6 @@ public class Game {
             } catch (InvalidBoardPositionException e) {
                 ioHandler.printInvalidInputMessage();
                 continue;
-            } catch (UninitializedBoardException e) {
-                throw new RuntimeException("Called render on uninitialized matrix", e);
             }
 
             if (isLost()) {

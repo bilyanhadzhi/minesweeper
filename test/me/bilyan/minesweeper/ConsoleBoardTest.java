@@ -1,7 +1,6 @@
 package me.bilyan.minesweeper;
 
 import me.bilyan.minesweeper.exceptions.InvalidBoardPositionException;
-import me.bilyan.minesweeper.exceptions.UninitializedBoardException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,6 +47,30 @@ public class ConsoleBoardTest {
             "7    –  –  –  –  –  –  –  –  – \n" +
             "8    –  –  –  –  –  –  –  –  – \n";
 
+    private static final String OUTPUT_NOTHING_REVEALED =
+            "     0  1  2  3  4  5  6  7  8 \n" +
+            "0    –  –  –  –  –  –  –  –  – \n" +
+            "1    –  –  –  –  –  –  –  –  – \n" +
+            "2    –  –  –  –  –  –  –  –  – \n" +
+            "3    –  –  –  –  –  –  –  –  – \n" +
+            "4    –  –  –  –  –  –  –  –  – \n" +
+            "5    –  –  –  –  –  –  –  –  – \n" +
+            "6    –  –  –  –  –  –  –  –  – \n" +
+            "7    –  –  –  –  –  –  –  –  – \n" +
+            "8    –  –  –  –  –  –  –  –  – \n";
+
+    private static final String OUTPUT_FIRST_ON_MINE =
+            "     0  1  2  3  4  5  6  7  8 \n" +
+            "0    *  –  –  –  –  –  –  –  – \n" +
+            "1    –  *  –  –  –  –  –  –  – \n" +
+            "2    –  –  *  –  –  –  –  –  – \n" +
+            "3    –  –  –  *  –  –  –  –  – \n" +
+            "4    –  –  –  –  *  –  –  –  – \n" +
+            "5    –  –  –  –  –  *  –  –  – \n" +
+            "6    –  –  –  –  –  –  *  –  – \n" +
+            "7    –  –  –  –  –  –  –  *  – \n" +
+            "8    1  *  –  –  –  –  –  –  * \n";
+
     @Mock
     private Random mockRandom;
 
@@ -55,12 +78,8 @@ public class ConsoleBoardTest {
 
     @Before
     public void initializeBoard() {
+        setUpMockRandom();
         this.defaultBoard = new ConsoleBoard(DEFAULT_DIFFICULTY, mockRandom, DEFAULT_RENDER_STREAM);
-    }
-
-    @Test(expected = UninitializedBoardException.class)
-    public void testRenderThrowsForUninitializedMatrix() throws UninitializedBoardException {
-        defaultBoard.render();
     }
 
     @Test(expected = InvalidBoardPositionException.class)
@@ -74,21 +93,21 @@ public class ConsoleBoardTest {
     }
 
     @Test
-    public void testBoardInitializesProperly() throws InvalidBoardPositionException {
-        setUpMockRandom();
-        defaultBoard.revealTile(new IntPair(0, 1));
+    public void testBoardInitializesProperly() {
+        resetByteOutputStream(DEFAULT_BYTE_STREAM);
 
         assertEquals(DEFAULT_DIFFICULTY.getRowsCount() * DEFAULT_DIFFICULTY.getColsCount(),
                 defaultBoard.getAllTilesCount());
 
-        assertEquals(1, defaultBoard.getRevealedSafeTilesCount());
+        assertEquals(0, defaultBoard.getRevealedSafeTilesCount());
         assertFalse(defaultBoard.hasRevealedMine());
+
+        defaultBoard.render();
+        assertEquals(OUTPUT_NOTHING_REVEALED, DEFAULT_BYTE_STREAM.toString());
     }
 
     @Test
-    public void testRevealTileRevealsNeighboringEmptyTiles() throws InvalidBoardPositionException,
-            UninitializedBoardException {
-        setUpMockRandom();
+    public void testRevealTileRevealsNeighboringEmptyTiles() throws InvalidBoardPositionException {
         resetByteOutputStream(DEFAULT_BYTE_STREAM);
 
         defaultBoard.revealTile(new IntPair(0, 8));
@@ -100,9 +119,7 @@ public class ConsoleBoardTest {
     }
 
     @Test
-    public void testRevealMineRendersMines() throws InvalidBoardPositionException,
-            UninitializedBoardException {
-        setUpMockRandom();
+    public void testRevealMineRendersMines() throws InvalidBoardPositionException {
         resetByteOutputStream(DEFAULT_BYTE_STREAM);
 
         defaultBoard.revealTile(new IntPair(7, 0));
@@ -111,7 +128,17 @@ public class ConsoleBoardTest {
         defaultBoard.render();
         assertTrue(defaultBoard.hasRevealedMine());
         assertEquals(OUTPUT_MINES, DEFAULT_BYTE_STREAM.toString());
+    }
 
+    @Test
+    public void testFirstGuessOnMineMovesMine() throws InvalidBoardPositionException {
+        resetByteOutputStream(DEFAULT_BYTE_STREAM);
+
+        defaultBoard.revealTile(new IntPair(8, 0));
+        defaultBoard.revealTile(new IntPair(8, 1));
+
+        defaultBoard.render();
+        assertEquals(OUTPUT_FIRST_ON_MINE, DEFAULT_BYTE_STREAM.toString());
     }
 
     private void setUpMockRandom() {
@@ -125,7 +152,8 @@ public class ConsoleBoardTest {
                 .thenReturn(6).thenReturn(6)
                 .thenReturn(7).thenReturn(7)
                 .thenReturn(8).thenReturn(8)
-                .thenReturn(8).thenReturn(0);
+                .thenReturn(8).thenReturn(0)
+                .thenReturn(8).thenReturn(1);
     }
 
     private void resetByteOutputStream(ByteArrayOutputStream stream) {

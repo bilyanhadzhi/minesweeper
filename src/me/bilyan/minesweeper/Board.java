@@ -1,7 +1,6 @@
 package me.bilyan.minesweeper;
 
 import me.bilyan.minesweeper.exceptions.InvalidBoardPositionException;
-import me.bilyan.minesweeper.exceptions.UninitializedBoardException;
 
 /**
  * The board for the minesweeper game.
@@ -13,11 +12,10 @@ import me.bilyan.minesweeper.exceptions.UninitializedBoardException;
 public interface Board {
 
     /**
-     * @throws UninitializedBoardException if this method is called before {@code revealTile} has been.
      *
      * Prints the board's state.
      */
-    void render() throws UninitializedBoardException;
+    void render();
 
 
     /**

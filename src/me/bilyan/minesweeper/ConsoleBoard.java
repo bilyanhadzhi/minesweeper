@@ -1,7 +1,6 @@
 package me.bilyan.minesweeper;
 
 import me.bilyan.minesweeper.exceptions.InvalidBoardPositionException;
-import me.bilyan.minesweeper.exceptions.UninitializedBoardException;
 
 import java.io.PrintStream;
 import java.util.HashSet;
@@ -42,14 +41,12 @@ public class ConsoleBoard implements Board {
         this.mineTileCoordinates = new HashSet<>();
         this.random = random;
         this.output = output;
+
+        generateInitialState();
     }
 
     @Override
-    public void render() throws UninitializedBoardException {
-        if (state == null) {
-            throw new UninitializedBoardException("Trying to initialize board that does not exist");
-        }
-
+    public void render() {
         // print column numbers
         output.append("    ");
 
@@ -79,9 +76,8 @@ public class ConsoleBoard implements Board {
             throw new InvalidBoardPositionException("Trying to reveal tile at invalid position");
         }
 
-        // the state is not generated until the first tile revealed
-        if (state == null) {
-            generateInitialState(coordinates);
+        if (revealedSafeTilesCount == 0 && state[coordinates.first()][coordinates.second()].isMine()) {
+            moveMineFromTile(coordinates);
         }
 
         Tile tile = state[coordinates.first()][coordinates.second()];
@@ -118,6 +114,27 @@ public class ConsoleBoard implements Board {
                 }
             }
         }
+    }
+
+    private void moveMineFromTile(IntPair coordinates) throws InvalidBoardPositionException {
+        if (!isValidBoardPosition(coordinates)) {
+            throw new InvalidBoardPositionException("Trying to move mine from invalid position");
+        }
+
+        if (!state[coordinates.first()][coordinates.second()].isMine()) {
+            return;
+        }
+
+        IntPair generated;
+        do {
+            generated = new IntPair(random.nextInt(rowsCount), random.nextInt(colsCount));
+        } while (mineTileCoordinates.contains(generated));
+
+        state[coordinates.first()][coordinates.second()].setMine(false);
+        state[generated.first()][generated.second()].setMine(true);
+
+        mineTileCoordinates.remove(coordinates);
+        mineTileCoordinates.add(generated);
     }
 
     @Override
@@ -162,7 +179,7 @@ public class ConsoleBoard implements Board {
         }
     }
 
-    private void generateInitialState(IntPair excluding) {
+    private void generateInitialState() {
         int minesLeftToGenerate = minesCount;
 
         state = new Tile[rowsCount][colsCount];
@@ -175,7 +192,7 @@ public class ConsoleBoard implements Board {
         while (minesLeftToGenerate > 0) {
             IntPair toAdd = new IntPair(random.nextInt(rowsCount), random.nextInt(colsCount));
 
-            if (state[toAdd.first()][toAdd.second()].isMine() || toAdd.equals(excluding)) {
+            if (state[toAdd.first()][toAdd.second()].isMine()) {
                 continue;
             }
 
@@ -186,7 +203,6 @@ public class ConsoleBoard implements Board {
     }
 
     private int getNeighboringMinesCount(IntPair coordinates) {
-
         int minesFound = 0;
 
         for (int i = 0; i < ROW_DIFFERENCE.length; i++) {
