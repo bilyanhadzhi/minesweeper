@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Random;
 
@@ -86,8 +87,11 @@ public class ConsoleBoardTest {
     }
 
     @Test
-    public void testRevealTileRevealsNeighboringEmptyTiles() throws InvalidBoardPositionException, UninitializedBoardException {
+    public void testRevealTileRevealsNeighboringEmptyTiles() throws InvalidBoardPositionException,
+            UninitializedBoardException {
         setUpMockRandom();
+        resetByteOutputStream(DEFAULT_BYTE_STREAM);
+
         defaultBoard.revealTile(new IntPair(0, 8));
 
         assertEquals(34, defaultBoard.getRevealedSafeTilesCount());
@@ -97,15 +101,18 @@ public class ConsoleBoardTest {
     }
 
     @Test
-    public void testRevealMineRendersMines() throws InvalidBoardPositionException, UninitializedBoardException {
+    public void testRevealMineRendersMines() throws InvalidBoardPositionException,
+            UninitializedBoardException {
         setUpMockRandom();
-        defaultBoard.revealTile(new IntPair(7, 0));
+        resetByteOutputStream(DEFAULT_BYTE_STREAM);
 
+        defaultBoard.revealTile(new IntPair(7, 0));
         defaultBoard.revealTile(new IntPair(8, 0));
 
         defaultBoard.render(DEFAULT_RENDER_STREAM);
         assertTrue(defaultBoard.hasRevealedMine());
         assertEquals(OUTPUT_MINES, DEFAULT_BYTE_STREAM.toString());
+
     }
 
     private void setUpMockRandom() {
@@ -120,5 +127,9 @@ public class ConsoleBoardTest {
                 .thenReturn(7).thenReturn(7)
                 .thenReturn(8).thenReturn(8)
                 .thenReturn(8).thenReturn(0);
+    }
+
+    private void resetByteOutputStream(ByteArrayOutputStream stream) {
+        stream.reset();
     }
 }
