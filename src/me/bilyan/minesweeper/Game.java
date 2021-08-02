@@ -2,26 +2,16 @@ package me.bilyan.minesweeper;
 
 import me.bilyan.minesweeper.exceptions.InvalidBoardPositionException;
 
-import java.io.PrintStream;
-import java.util.Random;
-
 public class Game {
     private final IOHandler ioHandler;
-    private Board board;
-    private Difficulty difficulty;
-    private final PrintStream boardOutput;
+    private final Board board;
 
-    public Game(PrintStream boardOutput, IOHandler ioHandler) {
+    public Game(Board board, IOHandler ioHandler) {
         this.ioHandler = ioHandler;
-        this.boardOutput = boardOutput;
+        this.board = board;
     }
 
     public void run() {
-        Difficulty difficulty = ioHandler.getDifficultyFromInput();
-
-        this.difficulty = difficulty;
-        this.board = new ConsoleBoard(difficulty, new Random(), boardOutput);
-
         while (true) {
             IntPair coordinatesInput = ioHandler.getCoordinatesFromInput();
 
@@ -54,7 +44,7 @@ public class Game {
     }
 
     private boolean isWon() {
-        return board.getRevealedSafeTilesCount() + difficulty.getMinesCount()
+        return board.getRevealedSafeTilesCount() + board.getDifficulty().getMinesCount()
                 == board.getAllTilesCount();
     }
 }

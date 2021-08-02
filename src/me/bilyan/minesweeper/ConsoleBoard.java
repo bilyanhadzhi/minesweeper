@@ -12,9 +12,7 @@ public class ConsoleBoard implements Board {
     private static final int[] ROW_DIFFERENCE = {1, 1, 1, 0, -1, -1, -1, 0};
     private static final int[] COL_DIFFERENCE = {-1, 0, 1, 1, 1, 0, -1, -1};
 
-    private final int rowsCount;
-    private final int colsCount;
-    private final int minesCount;
+    private final Difficulty difficulty;
 
     private Tile[][] state;
 
@@ -33,9 +31,7 @@ public class ConsoleBoard implements Board {
     private final PrintStream output;
 
     public ConsoleBoard(Difficulty difficulty, Random random, PrintStream output) {
-        this.rowsCount = difficulty.getRowsCount();
-        this.colsCount = difficulty.getColsCount();
-        this.minesCount = difficulty.getMinesCount();
+        this.difficulty = difficulty;
 
         this.revealedSafeTilesCount = 0;
         this.mineTileCoordinates = new HashSet<>();
@@ -50,18 +46,18 @@ public class ConsoleBoard implements Board {
         // print column numbers
         output.append("    ");
 
-        for (int col = 0; col < colsCount; col++) {
+        for (int col = 0; col < difficulty.getColsCount(); col++) {
             output.append(String.format("%2d ", col));
         }
         output.append(System.lineSeparator());
 
         // print board itself
-        for (int row = 0; row < rowsCount; row++) {
+        for (int row = 0; row < difficulty.getRowsCount(); row++) {
 
             // print row number
             output.append(String.format("%-4d", row));
 
-            for (int col = 0; col < colsCount; col++) {
+            for (int col = 0; col < difficulty.getColsCount(); col++) {
                 char toPrint = getCharacterForTile(new IntPair(row, col));
 
                 output.append(String.format("%2c ", toPrint));
@@ -127,7 +123,7 @@ public class ConsoleBoard implements Board {
 
         IntPair generated;
         do {
-            generated = new IntPair(random.nextInt(rowsCount), random.nextInt(colsCount));
+            generated = new IntPair(random.nextInt(difficulty.getRowsCount()), random.nextInt(difficulty.getColsCount()));
         } while (mineTileCoordinates.contains(generated));
 
         state[coordinates.first()][coordinates.second()].setMine(false);
@@ -149,7 +145,12 @@ public class ConsoleBoard implements Board {
 
     @Override
     public int getAllTilesCount() {
-        return rowsCount * colsCount;
+        return difficulty.getRowsCount() * difficulty.getColsCount();
+    }
+
+    @Override
+    public Difficulty getDifficulty() {
+        return difficulty;
     }
 
     private char getCharacterForTile(IntPair tileCoordinates) {
@@ -180,17 +181,17 @@ public class ConsoleBoard implements Board {
     }
 
     private void generateInitialState() {
-        int minesLeftToGenerate = minesCount;
+        int minesLeftToGenerate = difficulty.getMinesCount();
 
-        state = new Tile[rowsCount][colsCount];
-        for (int row = 0; row < rowsCount; row++) {
-            for (int col = 0; col < colsCount; col++) {
+        state = new Tile[difficulty.getRowsCount()][difficulty.getColsCount()];
+        for (int row = 0; row < difficulty.getRowsCount(); row++) {
+            for (int col = 0; col < difficulty.getColsCount(); col++) {
                 state[row][col] = new Tile();
             }
         }
 
         while (minesLeftToGenerate > 0) {
-            IntPair toAdd = new IntPair(random.nextInt(rowsCount), random.nextInt(colsCount));
+            IntPair toAdd = new IntPair(random.nextInt(difficulty.getRowsCount()), random.nextInt(difficulty.getColsCount()));
 
             if (state[toAdd.first()][toAdd.second()].isMine()) {
                 continue;
@@ -223,7 +224,7 @@ public class ConsoleBoard implements Board {
     }
 
     private boolean isValidBoardPosition(IntPair position) {
-        return position.first() >= 0 && position.first() < rowsCount
-                && position.second() >= 0 && position.second() < colsCount;
+        return position.first() >= 0 && position.first() < difficulty.getRowsCount()
+                && position.second() >= 0 && position.second() < difficulty.getColsCount();
     }
 }

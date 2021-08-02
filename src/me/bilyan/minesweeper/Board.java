@@ -12,7 +12,6 @@ import me.bilyan.minesweeper.exceptions.InvalidBoardPositionException;
 public interface Board {
 
     /**
-     *
      * Prints the board's state.
      */
     void render();
@@ -20,7 +19,7 @@ public interface Board {
 
     /**
      * @param coordinates The place of the tile to be revealed, as per (row, column) pair.
-     * @throws InvalidBoardPositionException if an invalid tile position has been supplied.
+     * @throws InvalidBoardPositionException If an invalid tile position has been supplied.
      *
      * Upon first call, the board's state is unknown, the board's state is
      * then created and the supplied tile is used to ensure that itself
@@ -48,4 +47,12 @@ public interface Board {
      * @return The number of all tiles on the board.
      */
     int getAllTilesCount();
+
+    /**
+     * @return The difficulty of the board.
+     *
+     * Each difficulty defines the dimensions of the board
+     * and the number of mines on it.
+     */
+    Difficulty getDifficulty();
 }

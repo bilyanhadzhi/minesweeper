@@ -4,7 +4,27 @@ import org.junit.Test;
 
 public class GameTest {
 
+    IOHandler ioHandler;
+
+    private Game defaultGame;
+
     @Test
-    public void run() {
+    public void testInvalidInputMessageForInvalidCoordinates() {
+
+    }
+
+    @Test
+    public void testBoardIsRenderedForValidInput() {
+
+    }
+
+    @Test
+    public void testLoseMessagePrintedForLosingGame() {
+
+    }
+
+    @Test
+    public void testSuccessMessagePrintedForWinningGame() {
+
     }
 }
